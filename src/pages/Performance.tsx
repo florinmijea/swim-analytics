@@ -18,7 +18,6 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
-  TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { Swimmer } from '../types/swimmers';
@@ -152,7 +151,8 @@ const Performance: React.FC = () => {
           return acc + val / 100;
         }, 0));
         const currentTime = Math.abs(timeInSeconds);
-        timeDiff = (prevTime - currentTime).toFixed(2);
+        const diff = (prevTime - currentTime).toFixed(2);
+        timeDiff = Number(diff);
       }
 
       return {
@@ -161,7 +161,7 @@ const Performance: React.FC = () => {
         date: event.date,
         displayTime: event.time,
         competition: event.competition,
-        timeDiff: timeDiff ? (timeDiff > 0 ? `-${timeDiff}s` : `+${Math.abs(Number(timeDiff))}s`) : null
+        timeDiff: timeDiff ? (timeDiff > 0 ? `-${timeDiff}s` : `+${Math.abs(timeDiff)}s`) : null
       };
     });
 
@@ -227,8 +227,13 @@ const Performance: React.FC = () => {
           maxRotation: 45,
           minRotation: 45,
         },
+        title: {
+          display: true,
+          text: 'Date'
+        }
       },
       y: {
+        reverse: true,
         grid: {
           color: 'rgba(0, 0, 0, 0.1)',
         },
@@ -240,6 +245,10 @@ const Performance: React.FC = () => {
             return `${minutes}:${seconds.padStart(5, '0')}`;
           },
         },
+        title: {
+          display: true,
+          text: 'Time (seconds)'
+        }
       },
     },
   };

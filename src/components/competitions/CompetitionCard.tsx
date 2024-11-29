@@ -45,9 +45,9 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition }) => {
 
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
-            Results:
+            Events:
           </Typography>
-          {competition.results.map((result, index) => (
+          {competition.events.map((event, index) => (
             <Box
               key={index}
               sx={{
@@ -58,17 +58,16 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition }) => {
               }}
             >
               <Typography variant="body2">
-                {result.style}
+                {event.name}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="body2">
-                  {Math.floor(result.time / 60)}:
-                  {(result.time % 60).toFixed(2).padStart(5, '0')}
+                  {event.time}
                 </Typography>
                 <Chip
-                  label={`#${result.rank}`}
+                  label={event.place}
                   size="small"
-                  color={result.rank === 1 ? 'primary' : 'default'}
+                  color={event.place === '1st' ? 'primary' : 'default'}
                   sx={{ minWidth: 60 }}
                 />
               </Box>
@@ -77,7 +76,7 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition }) => {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          {competition.participants.length} Participants
+          Competition Type: {competition.type}
         </Typography>
       </CardContent>
     </Card>

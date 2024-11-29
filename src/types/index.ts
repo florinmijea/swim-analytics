@@ -40,8 +40,14 @@ export interface Competition {
   name: string;
   date: string;
   location: string;
-  participants: string[];
-  results: CompetitionResult[];
+  type: string;
+  events: CompetitionEvent[];
+}
+
+export interface CompetitionEvent {
+  name: string;
+  time: string;
+  place: string;
 }
 
 export interface CompetitionResult {

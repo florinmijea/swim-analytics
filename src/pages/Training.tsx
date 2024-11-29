@@ -8,14 +8,12 @@ import {
   CardContent,
   ToggleButton,
   ToggleButtonGroup,
-  Button,
 } from '@mui/material';
 import {
   CalendarToday,
   Pool,
   Timer,
   TrendingUp,
-  Refresh,
 } from '@mui/icons-material';
 import TrainingSessionCard from '../components/training/TrainingSessionCard';
 import { TrainingSession } from '../types';
@@ -43,10 +41,7 @@ const Training: React.FC = () => {
     loadData();
   }, []);
 
-  const handleTypeChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newType: TrainingType,
-  ) => {
+  const handleTypeChange = (_: React.MouseEvent<HTMLElement>, newType: TrainingType | null) => {
     if (newType !== null) {
       setSelectedType(newType);
     }

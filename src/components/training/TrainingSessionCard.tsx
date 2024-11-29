@@ -9,7 +9,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  LinearProgress,
 } from '@mui/material';
 import {
   ExpandMore,

@@ -37,10 +37,6 @@ const Home: React.FC = () => {
     loadSwimmers();
   }, []);
 
-  const handleSwimmerSelect = (swimmer: Swimmer) => {
-    navigate(`/profile/${swimmer.swimmer_id}`);
-  };
-
   const filteredSwimmers = swimmers.filter(swimmer =>
     swimmer.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
