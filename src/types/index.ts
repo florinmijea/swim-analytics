@@ -32,7 +32,11 @@ export interface Competition {
   date: string;
   location: string;
   type: string;
-  events: CompetitionEvent[];
+  events: {
+    name: string;
+    time: string;
+    place: string;
+  }[];
 }
 
 export interface CompetitionEvent {
@@ -55,7 +59,15 @@ export interface TrainingSession {
   style: string;
   duration: number; // in minutes
   distance: number; // in meters
-  exercises: Exercise[];
+  exercises: {
+    id: string;
+    name: string;
+    sets: number;
+    reps: number;
+    distance: number;
+    restTime: number; // in seconds
+    description: string;
+  }[];
   notes?: string;
 }
 

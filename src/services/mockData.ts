@@ -132,7 +132,6 @@ export const mockTrainingSessions: TrainingSession[] = [
         reps: 400,
         distance: 1200,
         restTime: 90,
-        targetTime: '6:00',
         description: 'Negative split'
       }
     ],
