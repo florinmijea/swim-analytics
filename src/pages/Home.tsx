@@ -108,21 +108,22 @@ const Home: React.FC = () => {
             
             {searchQuery && (
               <List sx={{ mt: 2, maxHeight: 400, overflow: 'auto' }}>
-                {filteredSwimmers.map((swimmer) => (
+                {filteredSwimmers.map((swimmer, index) => (
                   <ListItem
-                    key={swimmer.swimmer_id}
-                    button
-                    onClick={() => handleSwimmerSelect(swimmer)}
+                    key={index}
+                    component="div"
+                    onClick={() => navigate(`/profile/${swimmer.swimmer_id}`)}
                     sx={{
                       '&:hover': {
                         backgroundColor: 'action.hover',
                       },
                       borderRadius: 1,
+                      cursor: 'pointer',
                     }}
                   >
-                    <ListItemText 
+                    <ListItemText
                       primary={swimmer.name}
-                      secondary={swimmer.club}
+                      secondary={`Club: ${swimmer.club}`}
                     />
                   </ListItem>
                 ))}

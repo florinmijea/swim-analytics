@@ -3,12 +3,10 @@ import { useParams } from 'react-router-dom';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   LinearProgress,
   Alert,
   Grid,
-  useTheme,
 } from '@mui/material';
 import {
   Chart as ChartJS,
@@ -19,9 +17,10 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartOptions,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Swimmer, Competition, Event } from '../types/swimmers';
+import { Swimmer } from '../types/swimmers';
 import { getSwimmerData } from '../services/mockData';
 
 // Register ChartJS components
@@ -36,7 +35,6 @@ ChartJS.register(
 );
 
 const Performance: React.FC = () => {
-  const theme = useTheme();
   const { swimmerId } = useParams();
   const [swimmer, setSwimmer] = useState<Swimmer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,11 +90,14 @@ const Performance: React.FC = () => {
   const eventsByStyle: { [key: string]: { date: Date; time: string; competition: string }[] } = {};
 
   swimmer.competitions.forEach(comp => {
+    console.log('Processing competition:', comp);
     comp.events.forEach(event => {
       const style = event.event_name.split('/')[1]?.trim() || event.event_name;
+      console.log('Processing event:', event, 'Style:', style);
       
       // Skip invalid times and disqualifications
       if (event.time === '99:99:99' || event.place === 'descalificat') {
+        console.log('Skipping invalid time or DQ:', event.time, event.place);
         return;
       }
 
@@ -117,7 +118,10 @@ const Performance: React.FC = () => {
     eventsByStyle[style].sort((a, b) => a.date.getTime() - b.date.getTime());
   });
 
+  console.log('Processed events by style:', eventsByStyle);
+
   const createChartData = (events: { date: Date; time: string; competition: string }[]) => {
+    console.log('Creating chart data for events:', events);
     const timeData = events.map((event, index) => {
       const [minutes, seconds, centiseconds] = event.time.split(':').map(Number);
       const timeInSeconds = -(minutes * 60 + seconds + (centiseconds || 0) / 100);
@@ -134,7 +138,7 @@ const Performance: React.FC = () => {
         timeDiff = (prevTime - currentTime).toFixed(2);
       }
 
-      return {
+      const dataPoint = {
         x: event.date,
         y: timeInSeconds,
         date: event.date,
@@ -142,9 +146,11 @@ const Performance: React.FC = () => {
         competition: event.competition,
         timeDiff: timeDiff ? (timeDiff > 0 ? `-${timeDiff}s` : `+${Math.abs(Number(timeDiff))}s`) : null
       };
+      console.log('Created data point:', dataPoint);
+      return dataPoint;
     });
 
-    return {
+    const chartData = {
       labels: timeData.map(d => d.date.toLocaleDateString()),
       datasets: [
         {
@@ -162,9 +168,11 @@ const Performance: React.FC = () => {
         },
       ],
     };
+    console.log('Created chart data:', chartData);
+    return chartData;
   };
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -203,12 +211,13 @@ const Performance: React.FC = () => {
       },
       y: {
         reverse: true,
+        type: 'linear' as const,
         grid: {
           color: '#f0f0f0',
         },
         ticks: {
-          callback: (value: number) => {
-            const absValue = Math.abs(value);
+          callback: function(value) {
+            const absValue = Math.abs(Number(value));
             const minutes = Math.floor(absValue / 60);
             const seconds = Math.floor(absValue % 60);
             const centiseconds = Math.round((absValue % 1) * 100);
@@ -219,30 +228,41 @@ const Performance: React.FC = () => {
     },
   };
 
+  const styles = Object.keys(eventsByStyle);
+  console.log('Available styles:', styles);
+
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h4" gutterBottom>
         {swimmer.name}'s Performance
       </Typography>
       <Grid container spacing={3}>
-        {Object.entries(eventsByStyle).map(([style, events]) => {
-          console.log(`Creating chart for ${style}:`, events);
-          return (
-            <Grid item xs={12} md={6} key={style}>
-              <Card sx={{ height: '400px', p: 2, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  {style}
-                </Typography>
-                <Box sx={{ height: 'calc(100% - 40px)' }}>
-                  <Line
-                    data={createChartData(events)}
-                    options={chartOptions}
-                  />
-                </Box>
-              </Card>
-            </Grid>
-          );
-        })}
+        {styles.length > 0 ? (
+          styles.map((style) => {
+            console.log(`Creating chart for ${style}:`, eventsByStyle[style]);
+            return (
+              <Grid item xs={12} md={6} key={style}>
+                <Card sx={{ height: '400px', p: 2, borderRadius: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {style}
+                  </Typography>
+                  <Box sx={{ height: 'calc(100% - 40px)' }}>
+                    <Line
+                      data={createChartData(eventsByStyle[style])}
+                      options={chartOptions}
+                    />
+                  </Box>
+                </Card>
+              </Grid>
+            );
+          })
+        ) : (
+          <Grid item xs={12}>
+            <Alert severity="info">
+              No performance data available for this swimmer.
+            </Alert>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

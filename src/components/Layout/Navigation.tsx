@@ -53,40 +53,25 @@ const Navigation: React.FC = () => {
       <List>
         {menuItems.map((item) => (
           <ListItem
-            button
-            key={item.text}
             component={Link}
             to={item.path}
             selected={location.pathname === item.path}
             sx={{
-              my: 0.5,
-              mx: 1,
+              mb: 1,
               borderRadius: 1,
               '&.Mui-selected': {
-                backgroundColor: theme.palette.primary.main + '20',
+                backgroundColor: theme.palette.primary.main,
+                color: 'white',
                 '&:hover': {
-                  backgroundColor: theme.palette.primary.main + '30',
+                  backgroundColor: theme.palette.primary.dark,
                 },
               },
             }}
           >
-            <ListItemIcon
-              sx={{
-                color: location.pathname === item.path
-                  ? theme.palette.primary.main
-                  : 'inherit',
-              }}
-            >
+            <ListItemIcon sx={{ color: 'inherit' }}>
               {item.icon}
             </ListItemIcon>
-            <ListItemText
-              primary={item.text}
-              sx={{
-                color: location.pathname === item.path
-                  ? theme.palette.primary.main
-                  : 'inherit',
-              }}
-            />
+            <ListItemText primary={item.text} />
           </ListItem>
         ))}
       </List>

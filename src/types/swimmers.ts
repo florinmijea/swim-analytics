@@ -15,7 +15,7 @@ export interface Swimmer {
   swimmer_id: number;
   name: string;
   competitions: Competition[];
-  gender: 'M' | 'F';
+  gender: string;
   birth_year: number;
   club: string;
   lpin_license: string;
