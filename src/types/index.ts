@@ -21,18 +21,9 @@ export interface TimeRecord {
 export interface Club {
   id: string;
   name: string;
-  totalSwimmers: number;
-  competitionsParticipated: number;
-  ranking: number;
   location: string;
-  achievements: {
-    goldMedals: number;
-    silverMedals: number;
-    bronzeMedals: number;
-  };
-  topStyles: string[];
-  coachName: string;
-  foundedYear: number;
+  coach: string;
+  members: number;
 }
 
 export interface Competition {

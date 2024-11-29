@@ -3,7 +3,10 @@ import { Swimmer } from '../types/swimmers';
 import swimmersData from '../../data/swimmers_data.json';
 
 export const getAllSwimmers = async (): Promise<Swimmer[]> => {
-  return swimmersData;
+  return swimmersData.map(swimmer => ({
+    ...swimmer,
+    birth_year: swimmer.birth_year || new Date().getFullYear() - 20 // Default age of 20 if birth_year is null
+  }));
 };
 
 export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null> => {
@@ -13,7 +16,12 @@ export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null
   }
 
   const swimmer = swimmersData.find(s => s.swimmer_id.toString() === swimmerId);
-  return swimmer || null;
+  if (!swimmer) return null;
+
+  return {
+    ...swimmer,
+    birth_year: swimmer.birth_year || new Date().getFullYear() - 20 // Default age of 20 if birth_year is null
+  };
 };
 
 export const getCompetitions = async (): Promise<Competition[]> => {
@@ -53,7 +61,7 @@ export const mockCompetitions: Competition[] = [
   }
 ];
 
-export const mockClubs = [
+export const mockClubs: Club[] = [
   {
     id: '1',
     name: 'Aquatic Champions',
