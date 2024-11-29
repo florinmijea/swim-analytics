@@ -9,6 +9,7 @@ const Profile = React.lazy(() => import('./pages/Profile'));
 const Performance = React.lazy(() => import('./pages/Performance'));
 const Competitions = React.lazy(() => import('./pages/Competitions'));
 const Training = React.lazy(() => import('./pages/Training'));
+const SwimmingClubs = React.lazy(() => import('./pages/SwimmingClubs'));
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               <Route path="competitions" element={<Competitions />} />
               <Route path="training" element={<Training />} />
             </Route>
+            <Route path="/clubs" element={<SwimmingClubs />} />
           </Routes>
         </React.Suspense>
       </AppLayout>

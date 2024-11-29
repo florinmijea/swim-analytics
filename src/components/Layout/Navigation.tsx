@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Typography,
@@ -52,7 +52,8 @@ const Navigation: React.FC = () => {
       </Box>
       <List>
         {menuItems.map((item) => (
-          <ListItem
+          <ListItemButton
+            key={item.path}
             component={Link}
             to={item.path}
             selected={location.pathname === item.path}
@@ -72,7 +73,7 @@ const Navigation: React.FC = () => {
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
     </Drawer>

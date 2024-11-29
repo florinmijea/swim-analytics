@@ -6,7 +6,6 @@ import {
   Box,
   Chip,
   Grid,
-  LinearProgress,
   Divider,
 } from '@mui/material';
 import {
@@ -23,11 +22,6 @@ interface ClubCardProps {
 }
 
 const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
-  const totalMedals = 
-    club.achievements.goldMedals +
-    club.achievements.silverMedals +
-    club.achievements.bronzeMedals;
-
   return (
     <Card>
       <CardContent>
