@@ -129,7 +129,7 @@ const Home: React.FC = () => {
             .sort((a, b) => b.value - a.value)
             .slice(0, 5), // Get top 5 most popular styles
           ageGroups: Array.from(ageGroups.entries())
-            .map(([name, value]) => ({ name, value }))
+            .map(([name]) => ({ name, value: ageGroups.get(name) || 0 }))
             .sort((a, b) => {
               const aStart = parseInt(a.name.split('-')[0]);
               const bStart = parseInt(b.name.split('-')[0]);

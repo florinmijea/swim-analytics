@@ -98,36 +98,35 @@ const Performance: React.FC = () => {
   console.log('Processing competitions:', swimmer.competitions);
   const eventsByStyle: { [key: string]: { date: Date; time: string; competition: string }[] } = {};
 
-  swimmer.competitions?.forEach(comp => {
-    if (!comp || !comp.events) return;
-    
-    console.log('Processing competition:', comp);
-    comp.events.forEach(event => {
-      if (!event || !event.event_name) return;
-      
-      const style = event.event_name.split('/')[1]?.trim() || event.event_name;
-      console.log('Processing event:', event, 'Style:', style);
-      
-      // Skip invalid times and disqualifications
-      if (event.time === '99:99:99' || event.place === 'descalificat') {
-        console.log('Skipping invalid time or DQ:', event.time, event.place);
-        return;
-      }
+  if (swimmer?.competitions) {
+    swimmer.competitions.forEach((comp: Competition) => {
+      comp.events.forEach((event: Event) => {
+        if (!event || !event.event_name) return;
+        
+        const style = event.event_name.split('/')[1]?.trim() || event.event_name;
+        console.log('Processing event:', event, 'Style:', style);
+        
+        // Skip invalid times and disqualifications
+        if (event.time === '99:99:99' || event.place === 'descalificat') {
+          console.log('Skipping invalid time or DQ:', event.time, event.place);
+          return;
+        }
 
-      if (!eventsByStyle[style]) {
-        eventsByStyle[style] = [];
-      }
+        if (!eventsByStyle[style]) {
+          eventsByStyle[style] = [];
+        }
 
-      const startDate = new Date(comp.start_date);
-      if (!isNaN(startDate.getTime())) {
-        eventsByStyle[style].push({
-          date: startDate,
-          time: event.time,
-          competition: comp.competition_name
-        });
-      }
+        const startDate = new Date(comp.start_date);
+        if (!isNaN(startDate.getTime())) {
+          eventsByStyle[style].push({
+            date: startDate,
+            time: event.time,
+            competition: comp.competition_name
+          });
+        }
+      });
     });
-  });
+  }
 
   // Sort events by date for each style
   Object.keys(eventsByStyle).forEach(style => {

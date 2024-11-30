@@ -18,8 +18,20 @@ export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null
   const swimmer = swimmersData.find(s => s.swimmer_id.toString() === swimmerId);
   if (!swimmer) return null;
 
+  // Handle legacy data where name might be a single field
+  let firstName = swimmer.first_name;
+  let lastName = swimmer.last_name;
+  
+  if (!firstName && !lastName && swimmer.name) {
+    const nameParts = swimmer.name.split(' ');
+    firstName = nameParts[0] || '';
+    lastName = nameParts.slice(1).join(' ') || '';
+  }
+
   return {
     ...swimmer,
+    first_name: firstName || '',
+    last_name: lastName || '',
     birth_year: swimmer.birth_year || new Date().getFullYear() - 20 // Default age of 20 if birth_year is null
   };
 };
@@ -103,14 +115,25 @@ export const getSwimmerCompetitions = async (swimmerId: string): Promise<Competi
 
   // Process swimmer's competitions
   const competitions = swimmer.competitions.map(comp => {
-    // Filter valid events
-    const validEvents = comp.events
-      .filter(event => event.time !== '99:99:99' && event.place !== 'descalificat')
-      .map(event => ({
-        name: event.event_name,
-        time: event.time,
-        place: event.place
-      }));
+    // Get all events, including future ones
+    const events = comp.events.map(event => ({
+      name: event.event_name,
+      time: event.time,
+      place: event.place
+    }));
+
+    const isFutureCompetition = new Date(comp.start_date) > new Date();
+
+    // For past competitions, only include those with valid events
+    // For future competitions, include them regardless of event times
+    if (!isFutureCompetition) {
+      const hasValidEvents = events.some(event => 
+        event.time !== '99:99:99' && event.place !== 'descalificat'
+      );
+      if (!hasValidEvents) {
+        return null;
+      }
+    }
 
     return {
       id: `${comp.competition_name}-${comp.start_date}`,
@@ -118,11 +141,12 @@ export const getSwimmerCompetitions = async (swimmerId: string): Promise<Competi
       date: comp.start_date,
       location: comp.location || 'Location TBD',
       type: comp.competition_type || 'Competition',
-      events: validEvents
+      events: events,
+      isFuture: isFutureCompetition
     };
   })
-  .filter(comp => comp.events.length > 0) // Only include competitions with valid events
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  .filter((comp): comp is Competition => comp !== null)
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Cache the results
   competitionsCache.set(swimmerId, competitions);

@@ -2,6 +2,8 @@ export interface Event {
   event_name: string;
   time: string;
   place: string;
+  competition_type?: string;
+  location?: string;
 }
 
 export interface Competition {
@@ -9,16 +11,22 @@ export interface Competition {
   start_date: string;
   end_date: string;
   events: Event[];
+  competition_type?: string;
+  location?: string;
 }
 
 export interface Swimmer {
   swimmer_id: number;
-  name: string;
+  first_name: string;
+  last_name: string;
   birth_year: number;
   club: string;
   preferred_styles?: string[];
   medals_count?: number;
   rank?: number;
+  gender?: string;
+  federation_license?: string;
+  competitions?: Competition[];
   personal_bests?: {
     [key: string]: {
       time: string;
@@ -37,7 +45,7 @@ export function calculateAge(birth_year: number): number {
 export function getBestTimes(competitions: Competition[]): Record<string, string> {
   const bestTimes: Record<string, string> = {};
   
-  competitions.forEach(comp => {
+  competitions?.forEach(comp => {
     comp.events.forEach(event => {
       const style = event.event_name.split('/')[1]?.trim() || event.event_name;
       if (event.time !== '99:99:99' && event.place !== 'descalificat') {

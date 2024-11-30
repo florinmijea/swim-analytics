@@ -26,23 +26,20 @@ export interface Club {
   members: number;
 }
 
+export interface Event {
+  name: string;
+  time: string;
+  place: string;
+}
+
 export interface Competition {
   id: string;
   name: string;
   date: string;
   location: string;
   type: string;
-  events: {
-    name: string;
-    time: string;
-    place: string;
-  }[];
-}
-
-export interface CompetitionEvent {
-  name: string;
-  time: string;
-  place: string;
+  events: Event[];
+  isFuture: boolean;
 }
 
 export interface CompetitionResult {

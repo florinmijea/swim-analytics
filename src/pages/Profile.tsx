@@ -120,29 +120,30 @@ const Profile: React.FC = () => {
                   >
                     <Pool sx={{ fontSize: 60 }} />
                   </Avatar>
-                  <Typography variant="h5" sx={{ mt: 2 }}>
-                    {swimmer.name}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Age: {calculateAge(swimmer.birth_year)}
-                  </Typography>
-                  <Chip
-                    label={swimmer.club}
-                    color="primary"
-                    sx={{ mt: 1 }}
-                  />
-                  <Box sx={{ mt: 2 }}>
-                    <Chip
-                      label={`Gender: ${swimmer.gender}`}
-                      variant="outlined"
-                      size="small"
-                      sx={{ mr: 1 }}
-                    />
-                    <Chip
-                      label={`License: ${swimmer.federation_license}`}
-                      variant="outlined"
-                      size="small"
-                    />
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography variant="h4">
+                      {swimmer ? 
+                        (swimmer.first_name || swimmer.last_name 
+                          ? `${swimmer.first_name || ''} ${swimmer.last_name || ''}`.trim()
+                          : 'Unnamed Swimmer'
+                        ) 
+                        : 'Loading...'}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Age: {swimmer ? calculateAge(swimmer.birth_year) : '-'} years
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Club: {swimmer?.club || '-'}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Gender: {swimmer?.gender || '-'}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      License: {swimmer?.federation_license || '-'}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Total Competitions: {swimmer?.competitions?.length || 0}
+                    </Typography>
                   </Box>
                 </CardContent>
               </Card>
