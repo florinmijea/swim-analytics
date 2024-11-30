@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { theme } from './theme';
 import './App.css';
 
 // Lazy load components
@@ -13,22 +16,25 @@ const SwimmingClubs = React.lazy(() => import('./pages/SwimmingClubs'));
 
 function App() {
   return (
-    <Router>
-      <AppLayout>
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/profile/:swimmerId" element={<Profile />}>
-              <Route path="" element={<Navigate to="performance" replace />} />
-              <Route path="performance" element={<Performance />} />
-              <Route path="competitions" element={<Competitions />} />
-              <Route path="training" element={<Training />} />
-            </Route>
-            <Route path="/clubs" element={<SwimmingClubs />} />
-          </Routes>
-        </React.Suspense>
-      </AppLayout>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <AppLayout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/profile/:swimmerId" element={<Profile />}>
+                <Route path="" element={<Navigate to="performance" replace />} />
+                <Route path="performance" element={<Performance />} />
+                <Route path="competitions" element={<Competitions />} />
+                <Route path="training" element={<Training />} />
+              </Route>
+              <Route path="/clubs" element={<SwimmingClubs />} />
+            </Routes>
+          </React.Suspense>
+        </AppLayout>
+      </Router>
+    </ThemeProvider>
   );
 }
 
