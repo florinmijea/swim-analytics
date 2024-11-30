@@ -234,12 +234,12 @@ const Home: React.FC = () => {
                   }}
                 >
                   <Typography variant="h6" color="white">
-                    {swimmer.name.charAt(0)}
+                    {swimmer.name?.charAt(0) ?? '?'}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="subtitle1" color="text.primary">
-                    {getSwimmerName(swimmer)}
+                    {swimmer.name ?? 'Unnamed Swimmer'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {swimmer.preferred_styles?.join(', ') || 'No styles specified'}

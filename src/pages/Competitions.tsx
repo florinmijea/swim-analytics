@@ -14,7 +14,7 @@ import {
 import { Search } from '@mui/icons-material';
 import CompetitionCard from '../components/competitions/CompetitionCard';
 import { Competition } from '../types';
-import { getSwimmerCompetitions, getSwimmerData } from '../services/mockData';
+import { getSwimmerCompetitions } from '../services/mockData';
 import { isFuture, isPast, parseISO } from 'date-fns';
 
 const Competitions: React.FC = () => {
