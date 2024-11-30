@@ -27,19 +27,19 @@ export interface Club {
 }
 
 export interface Event {
-  name: string;
+  event_name: string;
   time: string;
   place: string;
 }
 
 export interface Competition {
-  id: string;
-  name: string;
-  date: string;
-  location: string;
-  type: string;
+  competition_name: string;
+  start_date: string;
+  end_date: string;
+  location?: string;
+  competition_type?: string;
   events: Event[];
-  isFuture: boolean;
+  isFuture?: boolean;
 }
 
 export interface CompetitionResult {

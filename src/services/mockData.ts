@@ -1,26 +1,85 @@
-import { Competition, Club, TrainingSession } from '../types';
+import { Competition, Club, TrainingSession, Event } from '../types';
 import { Swimmer } from '../types/swimmers';
 import swimmersData from '../../data/swimmers_data.json';
 
-export const getAllSwimmers = async (): Promise<Swimmer[]> => {
-  return swimmersData.map(swimmer => {
-    // Split name into first_name and last_name if not already present
-    let firstName = swimmer.first_name;
-    let lastName = swimmer.last_name;
-    
-    if (!firstName && !lastName && swimmer.name) {
-      const nameParts = swimmer.name.split(' ');
-      firstName = nameParts[0] || '';
-      lastName = nameParts.slice(1).join(' ') || '';
-    }
+// Define the raw data type to match the JSON structure
+interface RawSwimmer {
+  swimmer_id: number;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  gender: string;
+  birth_year: number;
+  club: string;
+  lpin_license: string;
+  federation_license: string;
+  last_updated: string;
+  competitions?: {
+    competition_name: string;
+    start_date: string;
+    end_date: string;
+    location?: string;
+    competition_type?: string;
+    events: {
+      event_name: string;
+      time: string;
+      place: string;
+    }[];
+  }[];
+}
 
+const parseSwimmerName = (swimmer: RawSwimmer) => {
+  if (swimmer.first_name && swimmer.last_name) {
     return {
-      ...swimmer,
-      first_name: firstName || '',
-      last_name: lastName || '',
-      birth_year: swimmer.birth_year || new Date().getFullYear() - 20
+      first_name: swimmer.first_name,
+      last_name: swimmer.last_name
     };
-  });
+  }
+  
+  const nameParts = (swimmer.name || '').split(' ');
+  return {
+    first_name: nameParts[0] || '',
+    last_name: nameParts.slice(1).join(' ') || ''
+  };
+};
+
+const processSwimmer = (swimmer: RawSwimmer): Swimmer => {
+  const { first_name, last_name } = parseSwimmerName(swimmer);
+  
+  return {
+    swimmer_id: swimmer.swimmer_id,
+    first_name,
+    last_name,
+    name: swimmer.name,
+    gender: swimmer.gender,
+    birth_year: swimmer.birth_year || new Date().getFullYear() - 20,
+    club: swimmer.club,
+    lpin_license: swimmer.lpin_license,
+    federation_license: swimmer.federation_license,
+    last_updated: swimmer.last_updated,
+    competitions: swimmer.competitions?.map(comp => ({
+      competition_name: comp.competition_name,
+      start_date: comp.start_date,
+      end_date: comp.end_date || comp.start_date,
+      location: comp.location,
+      competition_type: comp.competition_type,
+      events: comp.events.map(event => ({
+        event_name: event.event_name,
+        time: event.time,
+        place: event.place
+      })),
+      isFuture: new Date(comp.end_date || comp.start_date) > new Date()
+    })) || []
+  };
+};
+
+export const getAllSwimmers = async (): Promise<Swimmer[]> => {
+  try {
+    return (swimmersData as RawSwimmer[]).map(processSwimmer);
+  } catch (error) {
+    console.error('Error loading swimmers:', error);
+    return [];
+  }
 };
 
 export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null> => {
@@ -29,25 +88,13 @@ export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null
     return null;
   }
 
-  const swimmer = swimmersData.find(s => s.swimmer_id.toString() === swimmerId);
-  if (!swimmer) return null;
-
-  // Split name into first_name and last_name if not already present
-  let firstName = swimmer.first_name;
-  let lastName = swimmer.last_name;
-  
-  if (!firstName && !lastName && swimmer.name) {
-    const nameParts = swimmer.name.split(' ');
-    firstName = nameParts[0] || '';
-    lastName = nameParts.slice(1).join(' ') || '';
+  try {
+    const swimmer = (swimmersData as RawSwimmer[]).find(s => s.swimmer_id.toString() === swimmerId);
+    return swimmer ? processSwimmer(swimmer) : null;
+  } catch (error) {
+    console.error('Error loading swimmer:', error);
+    return null;
   }
-
-  return {
-    ...swimmer,
-    first_name: firstName || '',
-    last_name: lastName || '',
-    birth_year: swimmer.birth_year || new Date().getFullYear() - 20
-  };
 };
 
 // Cache for competitions data
@@ -69,36 +116,38 @@ export const getCompetitions = async (): Promise<Competition[]> => {
 
     swimmer.competitions.forEach(comp => {
       const competitionId = `${comp.competition_name}-${comp.start_date}`;
+      const isFutureCompetition = new Date(comp.end_date || comp.start_date) > new Date();
       
       if (!competitionsMap.has(competitionId)) {
         // Initialize competition with valid events only
         const validEvents = comp.events
           .filter(event => event.time !== '99:99:99' && event.place !== 'descalificat')
           .map(event => ({
-            name: event.event_name,
+            event_name: event.event_name,
             time: event.time,
             place: event.place
           }));
 
         competitionsMap.set(competitionId, {
-          id: competitionId,
-          name: comp.competition_name,
-          date: comp.start_date,
+          competition_name: comp.competition_name,
+          start_date: comp.start_date,
+          end_date: comp.end_date || comp.start_date,
           location: comp.location || 'Location TBD',
-          type: comp.competition_type || 'Competition',
-          events: validEvents
+          competition_type: comp.competition_type || 'Competition',
+          events: validEvents,
+          isFuture: isFutureCompetition
         });
       } else {
         // Add only valid events that aren't duplicates
         const competition = competitionsMap.get(competitionId)!;
-        const existingEventNames = new Set(competition.events.map(e => e.name));
+        const existingEventNames = new Set(competition.events.map(e => e.event_name));
 
         comp.events.forEach(event => {
           if (event.time !== '99:99:99' && 
               event.place !== 'descalificat' && 
               !existingEventNames.has(event.event_name)) {
             competition.events.push({
-              name: event.event_name,
+              event_name: event.event_name,
               time: event.time,
               place: event.place
             });
@@ -111,7 +160,7 @@ export const getCompetitions = async (): Promise<Competition[]> => {
 
   // Sort competitions by date once at the end
   cachedCompetitions = Array.from(competitionsMap.values())
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
   return cachedCompetitions;
 };
@@ -128,39 +177,27 @@ export const getSwimmerCompetitions = async (swimmerId: string): Promise<Competi
   }
 
   // Process swimmer's competitions
-  const competitions = swimmer.competitions.map(comp => {
-    // Get all events, including future ones
-    const events = comp.events.map(event => ({
-      name: event.event_name,
-      time: event.time,
-      place: event.place
-    }));
-
-    const isFutureCompetition = new Date(comp.start_date) > new Date();
-
-    // For past competitions, only include those with valid events
-    // For future competitions, include them regardless of event times
-    if (!isFutureCompetition) {
-      const hasValidEvents = events.some(event => 
+  const competitions = swimmer.competitions
+    .map(comp => ({
+      competition_name: comp.competition_name,
+      start_date: comp.start_date,
+      end_date: comp.end_date || comp.start_date,
+      location: comp.location || 'Location TBD',
+      competition_type: comp.competition_type || 'Competition',
+      events: comp.events.map(event => ({
+        event_name: event.event_name,
+        time: event.time,
+        place: event.place
+      })),
+      isFuture: new Date(comp.end_date || comp.start_date) > new Date()
+    }))
+    .filter(comp => {
+      if (comp.isFuture) return true;
+      return comp.events.some(event => 
         event.time !== '99:99:99' && event.place !== 'descalificat'
       );
-      if (!hasValidEvents) {
-        return null;
-      }
-    }
-
-    return {
-      id: `${comp.competition_name}-${comp.start_date}`,
-      name: comp.competition_name,
-      date: comp.start_date,
-      location: comp.location || 'Location TBD',
-      type: comp.competition_type || 'Competition',
-      events: events,
-      isFuture: isFutureCompetition
-    };
-  })
-  .filter((comp): comp is Competition => comp !== null)
-  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    })
+    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
 
   // Cache the results
   competitionsCache.set(swimmerId, competitions);

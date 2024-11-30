@@ -59,12 +59,12 @@ const Competitions: React.FC = () => {
   const filterCompetitions = useCallback((data: Competition[], query: string, tab: number) => {
     const filtered = data.filter(competition => {
       const matchesSearch = !query || 
-        competition.name.toLowerCase().includes(query.toLowerCase()) ||
-        competition.location.toLowerCase().includes(query.toLowerCase());
+        competition.competition_name.toLowerCase().includes(query.toLowerCase()) ||
+        (competition.location || '').toLowerCase().includes(query.toLowerCase());
       
       if (!matchesSearch) return false;
 
-      const date = parseISO(competition.date);
+      const date = parseISO(competition.start_date);
       return (tab === 0) ||
              (tab === 1 && isPast(date)) ||
              (tab === 2 && isFuture(date));
@@ -102,16 +102,12 @@ const Competitions: React.FC = () => {
     );
   }
 
-  const pastCompetitions = competitions.filter(c => isPast(parseISO(c.date)));
-  const upcomingCompetitions = competitions.filter(c => isFuture(parseISO(c.date)));
-
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Competitions
-      </Typography>
-
-      <Box sx={{ mb: 3 }}>
+    <Box p={3}>
+      <Box mb={4}>
+        <Typography variant="h4" gutterBottom>
+          Competitions
+        </Typography>
         <TextField
           fullWidth
           variant="outlined"
@@ -127,33 +123,29 @@ const Competitions: React.FC = () => {
           }}
           sx={{ mb: 2 }}
         />
-
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
-          variant="fullWidth"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ mb: 2 }}
         >
-          <Tab label={`All (${competitions.length})`} />
-          <Tab label={`Past (${pastCompetitions.length})`} />
-          <Tab label={`Upcoming (${upcomingCompetitions.length})`} />
+          <Tab label="All" />
+          <Tab label="Past" />
+          <Tab label="Upcoming" />
         </Tabs>
       </Box>
 
       {filteredCompetitions.length === 0 ? (
-        <Box display="flex" justifyContent="center" p={4}>
+        <Box textAlign="center" py={4}>
           <Typography color="text.secondary">
-            {searchQuery 
-              ? 'No competitions match your search criteria'
-              : 'No competitions found'}
+            No competitions found
           </Typography>
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {filteredCompetitions.map((competition) => (
-            <Grid item xs={12} md={6} lg={4} key={competition.id}>
+          {filteredCompetitions.map((competition, index) => (
+            <Grid item xs={12} sm={12} md={6} key={index}>
               <CompetitionCard competition={competition} />
             </Grid>
           ))}

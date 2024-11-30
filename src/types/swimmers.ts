@@ -2,8 +2,6 @@ export interface Event {
   event_name: string;
   time: string;
   place: string;
-  competition_type?: string;
-  location?: string;
 }
 
 export interface Competition {
@@ -13,6 +11,7 @@ export interface Competition {
   events: Event[];
   competition_type?: string;
   location?: string;
+  isFuture?: boolean;
 }
 
 export interface Swimmer {
@@ -26,18 +25,8 @@ export interface Swimmer {
   lpin_license: string;
   federation_license: string;
   last_updated: string;
-  competitions?: {
-    competition_name: string;
-    start_date: string;
-    end_date: string;
-    location?: string;
-    competition_type?: string;
-    events: {
-      event_name: string;
-      time: string;
-      place: string;
-    }[];
-  }[];
+  competitions?: Competition[];
+  preferred_styles?: string[];
 }
 
 // Helper function to calculate age
