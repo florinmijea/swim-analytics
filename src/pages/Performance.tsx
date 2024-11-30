@@ -20,7 +20,7 @@ import {
   ChartOptions,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Swimmer, Competition, Event } from '../types';
+import { Swimmer, Competition, Event } from '../types/swimmers';
 import { getSwimmerData } from '../services/mockData';
 
 // Register ChartJS components
@@ -255,7 +255,7 @@ const Performance: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>
-        Performance Analysis
+        Performance Analysis for {swimmer.first_name} {swimmer.last_name}
       </Typography>
       <Grid container spacing={3}>
         {Object.entries(eventsByStyle).map(([style, events]) => (
