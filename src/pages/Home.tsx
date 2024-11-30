@@ -25,11 +25,17 @@ import {
   PieChart,
   Pie,
   Cell,
+  Legend,
 } from 'recharts';
 import { getAllSwimmers } from '../services/mockData';
 import { Swimmer } from '../types/swimmers';
 
 const COLORS = ['#6C5DD3', '#FF754C', '#FFA600', '#4CAF50', '#2196F3'];
+const MEDAL_COLORS = {
+  gold: '#FFD700',   // Gold color
+  silver: '#C0C0C0', // Silver color
+  bronze: '#CD7F32'  // Bronze color
+};
 
 const Home: React.FC = () => {
   const theme = useTheme();
@@ -44,7 +50,7 @@ const Home: React.FC = () => {
     totalMedals: 0,
     swimStyles: [] as { name: string; value: number }[],
     ageGroups: [] as { name: string; value: number }[],
-    medalDistribution: [] as { name: string; value: number }[],
+    medalDistribution: [] as { name: string; value: number; color: string }[],
   });
 
   useEffect(() => {
@@ -63,12 +69,18 @@ const Home: React.FC = () => {
         const ages = clubSwimmers.map(s => currentYear - (s.birth_year || currentYear - 20));
         const averageAge = Math.round(ages.reduce((a, b) => a + b, 0) / totalSwimmers);
 
-        // Count swim styles
+        // Count swim styles from actual competition events
         const styles = new Map<string, number>();
         clubSwimmers.forEach(swimmer => {
-          if (swimmer.preferred_styles) {
-            swimmer.preferred_styles.forEach(style => {
-              styles.set(style, (styles.get(style) || 0) + 1);
+          if (swimmer.competitions) {
+            swimmer.competitions.forEach(comp => {
+              comp.events.forEach(event => {
+                // Extract the style from the event name
+                const style = event.event_name.split('/')[1]?.trim() || event.event_name;
+                if (style && event.time !== '99:99:99' && event.place !== 'descalificat') {
+                  styles.set(style, (styles.get(style) || 0) + 1);
+                }
+              });
             });
           }
         });
@@ -82,19 +94,40 @@ const Home: React.FC = () => {
 
         // Calculate medal distribution
         const medals = {
-          gold: clubSwimmers.filter(s => s.rank === 1).length,
-          silver: clubSwimmers.filter(s => s.rank === 2).length,
-          bronze: clubSwimmers.filter(s => s.rank === 3).length,
+          gold: 0,
+          silver: 0,
+          bronze: 0
         };
+        
+        clubSwimmers.forEach(swimmer => {
+          if (swimmer.competitions) {
+            swimmer.competitions.forEach(comp => {
+              comp.events.forEach(event => {
+                if (event.place === '1') medals.gold++;
+                else if (event.place === '2') medals.silver++;
+                else if (event.place === '3') medals.bronze++;
+              });
+            });
+          }
+        });
+
+        const medalDistribution = [
+          { name: 'Gold', value: medals.gold, color: MEDAL_COLORS.gold },
+          { name: 'Silver', value: medals.silver, color: MEDAL_COLORS.silver },
+          { name: 'Bronze', value: medals.bronze, color: MEDAL_COLORS.bronze }
+        ];
 
         setClubStats({
           totalSwimmers,
           averageAge,
           totalMedals: medals.gold + medals.silver + medals.bronze,
           swimStyles: Array.from(styles.entries())
-            .map(([name, value]) => ({ name, value }))
+            .map(([name, value]) => ({ 
+              name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+              value 
+            }))
             .sort((a, b) => b.value - a.value)
-            .slice(0, 5),
+            .slice(0, 5), // Get top 5 most popular styles
           ageGroups: Array.from(ageGroups.entries())
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => {
@@ -102,11 +135,7 @@ const Home: React.FC = () => {
               const bStart = parseInt(b.name.split('-')[0]);
               return aStart - bStart;
             }),
-          medalDistribution: [
-            { name: 'Gold', value: medals.gold },
-            { name: 'Silver', value: medals.silver },
-            { name: 'Bronze', value: medals.bronze },
-          ],
+          medalDistribution
         });
       } catch (error) {
         console.error('Error loading data:', error);
@@ -358,10 +387,11 @@ const Home: React.FC = () => {
                       dataKey="value"
                     >
                       {clubStats.medalDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
+                    <Legend />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
@@ -373,7 +403,7 @@ const Home: React.FC = () => {
                         width: 12,
                         height: 12,
                         borderRadius: '50%',
-                        bgcolor: COLORS[index % COLORS.length],
+                        bgcolor: entry.color,
                         mr: 1,
                       }}
                     />

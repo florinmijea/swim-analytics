@@ -24,8 +24,119 @@ export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null
   };
 };
 
+// Cache for competitions data
+let cachedCompetitions: Competition[] | null = null;
+const competitionsCache = new Map<string, Competition[]>();
+
 export const getCompetitions = async (): Promise<Competition[]> => {
-  return mockCompetitions;
+  // Return cached data if available
+  if (cachedCompetitions) {
+    return cachedCompetitions;
+  }
+
+  const allSwimmers = await getAllSwimmers();
+  const competitionsMap = new Map<string, Competition>();
+
+  // Process all swimmers in a single pass
+  allSwimmers.forEach(swimmer => {
+    if (!swimmer.competitions) return;
+
+    swimmer.competitions.forEach(comp => {
+      const competitionId = `${comp.competition_name}-${comp.start_date}`;
+      
+      if (!competitionsMap.has(competitionId)) {
+        // Initialize competition with valid events only
+        const validEvents = comp.events
+          .filter(event => event.time !== '99:99:99' && event.place !== 'descalificat')
+          .map(event => ({
+            name: event.event_name,
+            time: event.time,
+            place: event.place
+          }));
+
+        competitionsMap.set(competitionId, {
+          id: competitionId,
+          name: comp.competition_name,
+          date: comp.start_date,
+          location: comp.location || 'Location TBD',
+          type: comp.competition_type || 'Competition',
+          events: validEvents
+        });
+      } else {
+        // Add only valid events that aren't duplicates
+        const competition = competitionsMap.get(competitionId)!;
+        const existingEventNames = new Set(competition.events.map(e => e.name));
+
+        comp.events.forEach(event => {
+          if (event.time !== '99:99:99' && 
+              event.place !== 'descalificat' && 
+              !existingEventNames.has(event.event_name)) {
+            competition.events.push({
+              name: event.event_name,
+              time: event.time,
+              place: event.place
+            });
+            existingEventNames.add(event.event_name);
+          }
+        });
+      }
+    });
+  });
+
+  // Sort competitions by date once at the end
+  cachedCompetitions = Array.from(competitionsMap.values())
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  return cachedCompetitions;
+};
+
+export const getSwimmerCompetitions = async (swimmerId: string): Promise<Competition[]> => {
+  // Return cached data if available
+  if (competitionsCache.has(swimmerId)) {
+    return competitionsCache.get(swimmerId)!;
+  }
+
+  const swimmer = await getSwimmerData(swimmerId);
+  if (!swimmer || !swimmer.competitions) {
+    return [];
+  }
+
+  // Process swimmer's competitions
+  const competitions = swimmer.competitions.map(comp => {
+    // Filter valid events
+    const validEvents = comp.events
+      .filter(event => event.time !== '99:99:99' && event.place !== 'descalificat')
+      .map(event => ({
+        name: event.event_name,
+        time: event.time,
+        place: event.place
+      }));
+
+    return {
+      id: `${comp.competition_name}-${comp.start_date}`,
+      name: comp.competition_name,
+      date: comp.start_date,
+      location: comp.location || 'Location TBD',
+      type: comp.competition_type || 'Competition',
+      events: validEvents
+    };
+  })
+  .filter(comp => comp.events.length > 0) // Only include competitions with valid events
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  // Cache the results
+  competitionsCache.set(swimmerId, competitions);
+  return competitions;
+};
+
+// Add a function to clear the cache if needed
+export const clearCompetitionsCache = (swimmerId?: string) => {
+  if (swimmerId) {
+    competitionsCache.delete(swimmerId);
+  } else {
+    competitionsCache.clear();
+    cachedCompetitions = null;
+  }
 };
 
 export const getClubs = async (): Promise<Club[]> => {
@@ -35,31 +146,6 @@ export const getClubs = async (): Promise<Club[]> => {
 export const getTrainingSessions = async (): Promise<TrainingSession[]> => {
   return mockTrainingSessions;
 };
-
-export const mockCompetitions: Competition[] = [
-  {
-    id: '1',
-    name: 'National Championship 2023',
-    date: '2023-12-15',
-    location: 'Olympic Pool Complex',
-    type: 'National',
-    events: [
-      { name: '100m Freestyle', time: '00:52:45', place: '1st' },
-      { name: '200m Butterfly', time: '02:15:30', place: '3rd' }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Regional Sprint Meet',
-    date: '2024-02-20',
-    location: 'City Aquatics Center',
-    type: 'Regional',
-    events: [
-      { name: '50m Freestyle', time: '00:24:15', place: '2nd' },
-      { name: '50m Butterfly', time: '00:26:45', place: '1st' }
-    ]
-  }
-];
 
 export const mockClubs: Club[] = [
   {
