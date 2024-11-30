@@ -20,7 +20,7 @@ import {
   ChartOptions,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Swimmer } from '../types/swimmers';
+import { Swimmer, Competition, Event } from '../types';
 import { getSwimmerData } from '../services/mockData';
 
 // Register ChartJS components

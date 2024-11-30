@@ -171,10 +171,6 @@ const Home: React.FC = () => {
     return '23+';
   };
 
-  const getSwimmerName = (swimmer: Swimmer) => {
-    return `${swimmer.first_name} ${swimmer.last_name}`.trim();
-  };
-
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -389,8 +385,8 @@ const Home: React.FC = () => {
                       paddingAngle={5}
                       dataKey="value"
                     >
-                      {clubStats.medalDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {clubStats.medalDistribution.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
@@ -399,7 +395,7 @@ const Home: React.FC = () => {
                 </ResponsiveContainer>
               </Box>
               <Box mt={2}>
-                {clubStats.medalDistribution.map((entry, index) => (
+                {clubStats.medalDistribution.map((entry) => (
                   <Box key={entry.name} display="flex" alignItems="center" mb={1}>
                     <Box
                       sx={{

@@ -4,6 +4,7 @@ export interface Swimmer {
   age: number;
   club: string;
   styles: SwimmingStyle[];
+  competitions?: Competition[];
 }
 
 export interface SwimmingStyle {
