@@ -20,9 +20,8 @@ import { isFuture, isPast, parseISO } from 'date-fns';
 const Competitions: React.FC = () => {
   const { swimmerId } = useParams<{ swimmerId: string }>();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [swimmerName, setSwimmerName] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCompetitions, setFilteredCompetitions] = useState<Competition[]>([]);
@@ -42,13 +41,9 @@ const Competitions: React.FC = () => {
           getSwimmerData(swimmerId)
         ]);
 
-        if (swimmerData) {
-          setSwimmerName(`${swimmerData.first_name} ${swimmerData.last_name}`);
-        }
-
         setCompetitions(competitionsData);
         filterCompetitions(competitionsData, searchQuery, tabValue);
-        setError('');
+        setError(null);
       } catch (error) {
         console.error('Error loading competitions:', error);
         setError('Failed to load competitions');

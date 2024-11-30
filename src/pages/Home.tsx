@@ -30,7 +30,6 @@ import {
 import { getAllSwimmers } from '../services/mockData';
 import { Swimmer } from '../types/swimmers';
 
-const COLORS = ['#6C5DD3', '#FF754C', '#FFA600', '#4CAF50', '#2196F3'];
 const MEDAL_COLORS = {
   gold: '#FFD700',   // Gold color
   silver: '#C0C0C0', // Silver color
@@ -172,6 +171,10 @@ const Home: React.FC = () => {
     return '23+';
   };
 
+  const getSwimmerName = (swimmer: Swimmer) => {
+    return `${swimmer.first_name} ${swimmer.last_name}`.trim();
+  };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -236,7 +239,7 @@ const Home: React.FC = () => {
                 </Box>
                 <Box>
                   <Typography variant="subtitle1" color="text.primary">
-                    {swimmer.name}
+                    {getSwimmerName(swimmer)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {swimmer.preferred_styles?.join(', ') || 'No styles specified'}

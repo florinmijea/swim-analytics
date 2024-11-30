@@ -3,10 +3,24 @@ import { Swimmer } from '../types/swimmers';
 import swimmersData from '../../data/swimmers_data.json';
 
 export const getAllSwimmers = async (): Promise<Swimmer[]> => {
-  return swimmersData.map(swimmer => ({
-    ...swimmer,
-    birth_year: swimmer.birth_year || new Date().getFullYear() - 20 // Default age of 20 if birth_year is null
-  }));
+  return swimmersData.map(swimmer => {
+    // Split name into first_name and last_name if not already present
+    let firstName = swimmer.first_name;
+    let lastName = swimmer.last_name;
+    
+    if (!firstName && !lastName && swimmer.name) {
+      const nameParts = swimmer.name.split(' ');
+      firstName = nameParts[0] || '';
+      lastName = nameParts.slice(1).join(' ') || '';
+    }
+
+    return {
+      ...swimmer,
+      first_name: firstName || '',
+      last_name: lastName || '',
+      birth_year: swimmer.birth_year || new Date().getFullYear() - 20
+    };
+  });
 };
 
 export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null> => {
@@ -18,7 +32,7 @@ export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null
   const swimmer = swimmersData.find(s => s.swimmer_id.toString() === swimmerId);
   if (!swimmer) return null;
 
-  // Handle legacy data where name might be a single field
+  // Split name into first_name and last_name if not already present
   let firstName = swimmer.first_name;
   let lastName = swimmer.last_name;
   
@@ -32,7 +46,7 @@ export const getSwimmerData = async (swimmerId?: string): Promise<Swimmer | null
     ...swimmer,
     first_name: firstName || '',
     last_name: lastName || '',
-    birth_year: swimmer.birth_year || new Date().getFullYear() - 20 // Default age of 20 if birth_year is null
+    birth_year: swimmer.birth_year || new Date().getFullYear() - 20
   };
 };
 

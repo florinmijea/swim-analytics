@@ -17,23 +17,27 @@ export interface Competition {
 
 export interface Swimmer {
   swimmer_id: number;
+  name?: string;
   first_name: string;
   last_name: string;
+  gender: string;
   birth_year: number;
   club: string;
-  preferred_styles?: string[];
-  medals_count?: number;
-  rank?: number;
-  gender?: string;
-  federation_license?: string;
-  competitions?: Competition[];
-  personal_bests?: {
-    [key: string]: {
+  lpin_license: string;
+  federation_license: string;
+  last_updated: string;
+  competitions?: {
+    competition_name: string;
+    start_date: string;
+    end_date: string;
+    location?: string;
+    competition_type?: string;
+    events: {
+      event_name: string;
       time: string;
-      date: string;
-      competition: string;
-    };
-  };
+      place: string;
+    }[];
+  }[];
 }
 
 // Helper function to calculate age
