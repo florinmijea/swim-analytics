@@ -36,11 +36,8 @@ const Competitions: React.FC = () => {
       }
 
       try {
-        const [competitionsData, swimmerData] = await Promise.all([
-          getSwimmerCompetitions(swimmerId),
-          getSwimmerData(swimmerId)
-        ]);
-
+        setLoading(true);
+        const competitionsData = await getSwimmerCompetitions(swimmerId);
         setCompetitions(competitionsData);
         filterCompetitions(competitionsData, searchQuery, tabValue);
         setError(null);

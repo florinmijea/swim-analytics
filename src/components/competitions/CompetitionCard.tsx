@@ -11,7 +11,7 @@ import {
   Grid,
 } from '@mui/material';
 import { format } from 'date-fns';
-import { Pool, LocationOn, EmojiEvents, Timer } from '@mui/icons-material';
+import { LocationOn, EmojiEvents, Timer } from '@mui/icons-material';
 import { Competition } from '../../types';
 
 interface CompetitionCardProps {
@@ -22,10 +22,12 @@ const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition }) => {
   const theme = useTheme();
 
   const getPlaceColor = (place: string) => {
-    if (place === '1') return theme.palette.gold?.main || '#FFD700';
-    if (place === '2') return theme.palette.silver?.main || '#C0C0C0';
-    if (place === '3') return theme.palette.bronze?.main || '#CD7F32';
-    return theme.palette.grey[500];
+    switch (place) {
+      case '1': return theme.palette.warning.light;  // Gold
+      case '2': return theme.palette.grey[400];  // Silver
+      case '3': return theme.palette.warning.dark;  // Bronze
+      default: return theme.palette.grey[500];
+    }
   };
 
   const getPlaceLabel = (place: string) => {

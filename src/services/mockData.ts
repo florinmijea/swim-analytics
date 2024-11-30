@@ -1,4 +1,4 @@
-import { Competition, Club, TrainingSession, Event } from '../types';
+import { Competition, Club, TrainingSession } from '../types';
 import { Swimmer } from '../types/swimmers';
 import swimmersData from '../../data/swimmers_data.json';
 

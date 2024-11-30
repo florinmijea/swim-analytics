@@ -86,29 +86,11 @@ const Profile: React.FC = () => {
     );
   }
 
-  const bestTimes = getBestTimes(swimmer.competitions);
+  const bestTimes = getBestTimes(swimmer.competitions || []);
   const styles = Object.entries(bestTimes).map(([style, time]) => ({
     name: style,
     bestTime: time
   }));
-
-  const transformCompetitions = (competitions: Swimmer['competitions']) => {
-    if (!competitions) return [];
-    
-    return competitions.map(comp => ({
-      id: `${comp.competition_name}-${comp.start_date}`,
-      name: comp.competition_name,
-      date: comp.start_date,
-      location: comp.location || 'Location TBD',
-      type: comp.competition_type || 'Competition',
-      events: comp.events.map(event => ({
-        name: event.event_name,
-        time: event.time,
-        place: event.place
-      })),
-      isFuture: new Date(comp.start_date) > new Date()
-    }));
-  };
 
   return (
     <SwimmerContext.Provider value={{ swimmer, loading, error }}>

@@ -151,11 +151,11 @@ const Home: React.FC = () => {
     if (query) {
       setFilteredSwimmers(
         allSwimmers.filter(swimmer =>
-          swimmer.name.toLowerCase().includes(query) ||
+          (swimmer.name?.toLowerCase().includes(query) ||
           swimmer.club.toLowerCase().includes(query) ||
           swimmer.preferred_styles?.some(style => 
             style.toLowerCase().includes(query)
-          )
+          )) ?? false
         )
       );
     } else {
@@ -202,7 +202,7 @@ const Home: React.FC = () => {
           Search Results ({filteredSwimmers.length})
         </Typography>
         <Grid container spacing={2}>
-          {filteredSwimmers.map((swimmer) => (
+          {filteredSwimmers.map(swimmer => (
             <Grid item xs={12} sm={6} md={4} key={swimmer.swimmer_id}>
               <Paper
                 elevation={0}
